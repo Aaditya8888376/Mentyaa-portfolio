@@ -668,6 +668,148 @@ button {
   display: none;
 }
 
+/* Cards that have a real reel URL show a pointer cursor */
+.reel-card[data-reel-url]:not([data-reel-url=""]) {
+  cursor: pointer;
+}
+
+/* Thumbnail image support
+   ─────────────────────────────────────────────────────────────
+   When you replace the gradient <div> with:
+     <img src="thumbnails/reel1.jpg" alt="..." class="reel-thumb" />
+   …the image fills the card perfectly.
+   ───────────────────────────────────────────────────────────── */
+.reel-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ============================================================
+   REEL LIGHTBOX MODAL
+   ============================================================ */
+.reel-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.reel-modal[hidden] {
+  display: none;
+}
+
+/* Semi-transparent dark backdrop */
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: pointer;
+  animation: fadeIn 0.22s ease;
+}
+
+.modal-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  /* 9:16 portrait — max height keeps it on screen */
+  max-width: min(360px, calc(100vh * 9 / 16));
+  animation: modalSlideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Close button */
+.modal-close {
+  position: absolute;
+  top: -44px;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  cursor: pointer;
+  z-index: 2;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: scale(1.1);
+}
+
+/* Body that holds the iframe */
+.modal-body {
+  aspect-ratio: 9 / 16;
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #000;
+  position: relative;
+}
+
+/* Loading spinner shown while iframe loads */
+.modal-body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111;
+  border-radius: 18px;
+  z-index: 0;
+}
+
+.modal-body::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(178, 79, 255, 0.25);
+  border-top-color: var(--clr-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  z-index: 1;
+}
+
+/* Iframe inside the modal */
+.modal-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 18px;
+  z-index: 2;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+@keyframes spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
 /* ============================================================
    SERVICES
    ============================================================ */

@@ -319,4 +319,153 @@
   window.addEventListener('scroll', updateActiveLink, { passive: true });
   updateActiveLink();
 
+  /* ----------------------------------------------------------
+     9. THUMBNAIL SUPPORT
+        If a reel card has data-thumb set, apply that image as the
+        background of the placeholder div so it shows a real thumbnail
+        instead of the gradient.
+  ---------------------------------------------------------- */
+  document.querySelectorAll('.reel-card[data-thumb]').forEach(function (card) {
+    const thumb = card.getAttribute('data-thumb');
+    if (!thumb) return;
+    const placeholder = card.querySelector('.reel-placeholder');
+    if (placeholder) {
+      placeholder.style.backgroundImage   = 'url(' + thumb + ')';
+      placeholder.style.backgroundSize    = 'cover';
+      placeholder.style.backgroundPosition = 'center';
+    }
+  });
+
+  /* ----------------------------------------------------------
+     10. REEL LIGHTBOX MODAL
+         Converts a full Instagram Reel URL or YouTube Shorts URL
+         into an embeddable iframe URL, then shows it in a modal.
+
+         Supported URL formats
+         ─────────────────────────────────────────────────────────
+         Instagram Reel:
+           https://www.instagram.com/reel/ABC123xyz/
+           https://www.instagram.com/p/ABC123xyz/
+
+         YouTube Shorts:
+           https://www.youtube.com/shorts/ABC123xyz
+           https://youtu.be/ABC123xyz
+           https://www.youtube.com/watch?v=ABC123xyz
+         ─────────────────────────────────────────────────────────
+  ---------------------------------------------------------- */
+  const reelModal     = document.getElementById('reelModal');
+  const modalBackdrop = document.getElementById('modalBackdrop');
+  const modalClose    = document.getElementById('modalClose');
+  const modalBody     = document.getElementById('modalBody');
+
+  /** Build a YouTube embed URL from a video ID. */
+  function ytEmbedUrl(videoId) {
+    return 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&mute=1&playsinline=1';
+  }
+
+  /**
+   * Convert a public reel/video URL to an embeddable iframe src.
+   *
+   * @param  {string} url  Full public URL of the Instagram Reel or YouTube video.
+   * @returns {string}     Ready-to-use iframe `src` value, or '' if not recognised.
+   *
+   * Supported formats:
+   *   Instagram – https://www.instagram.com/reel/CODE/
+   *               https://www.instagram.com/p/CODE/
+   *   YouTube   – https://www.youtube.com/shorts/ID
+   *               https://www.youtube.com/watch?v=ID
+   *               https://youtu.be/ID
+   */
+  function buildEmbedUrl(url) {
+    if (!url) return '';
+
+    // ── Instagram Reel or Post ──────────────────────────────────
+    // Matches: /reel/CODE/ or /p/CODE/
+    const igMatch = url.match(/instagram\.com\/(reel|p)\/([A-Za-z0-9_-]+)/);
+    if (igMatch) {
+      return 'https://www.instagram.com/' + igMatch[1] + '/' + igMatch[2] + '/embed/captioned/';
+    }
+
+    // ── YouTube Shorts ──────────────────────────────────────────
+    const ytShortsMatch = url.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]+)/);
+    if (ytShortsMatch) return ytEmbedUrl(ytShortsMatch[1]);
+
+    // ── YouTube standard watch URL ──────────────────────────────
+    const ytWatchMatch = url.match(/[?&]v=([A-Za-z0-9_-]+)/);
+    if (ytWatchMatch) return ytEmbedUrl(ytWatchMatch[1]);
+
+    // ── youtu.be short links ────────────────────────────────────
+    const ytShortMatch = url.match(/youtu\.be\/([A-Za-z0-9_-]+)/);
+    if (ytShortMatch) return ytEmbedUrl(ytShortMatch[1]);
+
+    // URL not recognised
+    console.warn('[Mentyaa] Unrecognised reel URL — expected an Instagram Reel or YouTube link:', url);
+    return '';
+  }
+
+  /** Open the lightbox with the given video URL. */
+  function openModal(videoUrl) {
+    const embedUrl = buildEmbedUrl(videoUrl);
+    if (!embedUrl) return; // URL not recognised — do nothing
+
+    // Build a sandboxed iframe
+    const iframe = document.createElement('iframe');
+    iframe.className = 'modal-iframe';
+    iframe.src = embedUrl;
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', '');
+    iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+    iframe.setAttribute('title', 'Reel preview');
+
+    modalBody.innerHTML = ''; // clear any previous embed
+    modalBody.appendChild(iframe);
+
+    reelModal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    modalClose.focus();
+  }
+
+  /** Close the lightbox and stop the video. */
+  function closeModal() {
+    reelModal.hidden = true;
+    document.body.style.overflow = '';
+    modalBody.innerHTML = ''; // removing iframe stops the video
+  }
+
+  // Close on ✕ button
+  if (modalClose) {
+    modalClose.addEventListener('click', closeModal);
+  }
+
+  // Close on backdrop click
+  if (modalBackdrop) {
+    modalBackdrop.addEventListener('click', closeModal);
+  }
+
+  // Close on ESC key
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && reelModal && !reelModal.hidden) {
+      closeModal();
+    }
+  });
+
+  // Open modal when a reel card is clicked
+  document.querySelectorAll('.reel-card[data-reel-url]').forEach(function (card) {
+    card.addEventListener('click', function () {
+      const url = card.getAttribute('data-reel-url');
+      if (url) openModal(url);
+    });
+
+    // Keyboard support — activate on Enter / Space
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    card.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const url = card.getAttribute('data-reel-url');
+        if (url) openModal(url);
+      }
+    });
+  });
+
 })();
