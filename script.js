@@ -203,80 +203,6 @@
   })();
 
   /* ----------------------------------------------------------
-     6. CONTACT FORM VALIDATION
-  ---------------------------------------------------------- */
-  const form        = document.getElementById('contactForm');
-  const formSuccess = document.getElementById('formSuccess');
-
-  if (form) {
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      let isValid = true;
-
-      /* Helper to set error */
-      function setError(id, msg) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = msg;
-        if (msg) isValid = false;
-      }
-
-      function clearErrors() {
-        ['nameError', 'emailError', 'serviceError', 'messageError'].forEach(function (id) {
-          const el = document.getElementById(id);
-          if (el) el.textContent = '';
-        });
-      }
-
-      clearErrors();
-      formSuccess.hidden = true;
-
-      const name    = form.elements['name'].value.trim();
-      const email   = form.elements['email'].value.trim();
-      const service = form.elements['service'].value;
-      const message = form.elements['message'].value.trim();
-
-      /* Mark fields as error or not */
-      form.elements['name'].classList.toggle('error', !name);
-      form.elements['email'].classList.toggle('error', !(email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)));
-      form.elements['service'].classList.toggle('error', !service);
-      form.elements['message'].classList.toggle('error', !message);
-
-      if (!name)    setError('nameError', 'Please enter your name.');
-      if (!email)   setError('emailError', 'Please enter a valid email address.');
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) setError('emailError', 'Please enter a valid email address.');
-      if (!service) setError('serviceError', 'Please select a service.');
-      if (!message) setError('messageError', 'Please describe your project.');
-
-      if (isValid) {
-        /* Simulate submission (no backend on GitHub Pages) */
-        const submitBtn = form.querySelector('.form-submit');
-        submitBtn.textContent = 'Sending…';
-        submitBtn.disabled = true;
-
-        setTimeout(function () {
-          submitBtn.textContent = 'Send Message';
-          submitBtn.disabled = false;
-          form.reset();
-          formSuccess.hidden = false;
-          formSuccess.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }, 1000);
-      }
-    });
-
-    /* Clear error on input */
-    ['name', 'email', 'service', 'message'].forEach(function (field) {
-      const el = form.elements[field];
-      if (el) {
-        el.addEventListener('input', function () {
-          el.classList.remove('error');
-          const errEl = document.getElementById(field + 'Error');
-          if (errEl) errEl.textContent = '';
-        });
-      }
-    });
-  }
-
-  /* ----------------------------------------------------------
      7. SMOOTH SCROLL for anchor links (Safari fallback)
   ---------------------------------------------------------- */
   document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
@@ -320,96 +246,135 @@
   updateActiveLink();
 
   /* ----------------------------------------------------------
-     9. THUMBNAIL SUPPORT
-        If a reel card has data-thumb set, apply that image as the
-        background of the placeholder div so it shows a real thumbnail
-        instead of the gradient.
+     9. CARD THUMBNAILS
+        Priority order:
+          1. data-thumb  — explicit image URL (always used if set)
+          2. data-video-src — auto-extract first frame via canvas
+          3. Fallback — gradient background (CSS, no JS needed)
   ---------------------------------------------------------- */
-  document.querySelectorAll('.reel-card[data-thumb]').forEach(function (card) {
-    const thumb = card.getAttribute('data-thumb');
-    if (!thumb) return;
-    const placeholder = card.querySelector('.reel-placeholder');
-    if (placeholder) {
-      placeholder.style.backgroundImage   = 'url(' + thumb + ')';
-      placeholder.style.backgroundSize    = 'cover';
-      placeholder.style.backgroundPosition = 'center';
+
+  /** Apply a thumbnail URL as the background of a placeholder element. */
+  function applyThumb(placeholder, url) {
+    placeholder.style.backgroundImage    = 'url(' + url + ')';
+    placeholder.style.backgroundSize     = 'cover';
+    placeholder.style.backgroundPosition = 'center';
+  }
+
+  document.querySelectorAll('.reel-card').forEach(function (card) {
+    var placeholder = card.querySelector('.reel-placeholder');
+    if (!placeholder) return;
+
+    var thumb     = card.getAttribute('data-thumb');
+    var videoSrc  = card.getAttribute('data-video-src');
+
+    // Explicit thumbnail wins
+    if (thumb) {
+      applyThumb(placeholder, thumb);
+      return;
+    }
+
+    // Auto-extract first frame from local video file
+    if (videoSrc) {
+      var vid = document.createElement('video');
+      vid.crossOrigin   = 'anonymous';
+      vid.muted         = true;
+      vid.playsInline   = true;
+      vid.preload       = 'metadata';
+
+      vid.addEventListener('loadedmetadata', function () {
+        // Seek slightly in to skip potential black/blank opening frames.
+        // Uses 5% of duration or 0.5 s, whichever is smaller — best-effort.
+        // The CSS gradient already provides a visual fallback if the canvas
+        // draw produces a blank result (e.g. some codecs / DRM content).
+        vid.currentTime = Math.min(0.5, (vid.duration * 0.05) || 0.1);
+      });
+
+      vid.addEventListener('seeked', function () {
+        try {
+          var canvas  = document.createElement('canvas');
+          canvas.width  = vid.videoWidth  || 360;
+          canvas.height = vid.videoHeight || 640;
+          canvas.getContext('2d').drawImage(vid, 0, 0, canvas.width, canvas.height);
+          applyThumb(placeholder, canvas.toDataURL('image/jpeg', 0.85));
+        } catch (err) {
+          // CORS or decode error — gradient fallback is already showing
+          console.warn('[Mentyaa] Could not auto-extract thumbnail for:', videoSrc, err);
+        }
+        vid.src = ''; // free memory
+      }, { once: true });
+
+      vid.src = videoSrc;
     }
   });
 
   /* ----------------------------------------------------------
      10. REEL LIGHTBOX MODAL
-         Converts a full Instagram Reel URL or YouTube Shorts URL
-         into an embeddable iframe URL, then shows it in a modal.
+         Supports:
+           • data-video-src  — local MP4 / video file  → <video> player
+           • data-reel-url   — Instagram Reel / YouTube  → <iframe> embed
 
-         Supported URL formats
-         ─────────────────────────────────────────────────────────
-         Instagram Reel:
-           https://www.instagram.com/reel/ABC123xyz/
-           https://www.instagram.com/p/ABC123xyz/
-
-         YouTube Shorts:
-           https://www.youtube.com/shorts/ABC123xyz
-           https://youtu.be/ABC123xyz
-           https://www.youtube.com/watch?v=ABC123xyz
-         ─────────────────────────────────────────────────────────
+         Supported iframe URL formats:
+           Instagram Reel : https://www.instagram.com/reel/CODE/
+           Instagram Post : https://www.instagram.com/p/CODE/
+           YouTube Shorts : https://www.youtube.com/shorts/ID
+           YouTube watch  : https://www.youtube.com/watch?v=ID
+           youtu.be short : https://youtu.be/ID
   ---------------------------------------------------------- */
-  const reelModal     = document.getElementById('reelModal');
-  const modalBackdrop = document.getElementById('modalBackdrop');
-  const modalClose    = document.getElementById('modalClose');
-  const modalBody     = document.getElementById('modalBody');
+  var reelModal     = document.getElementById('reelModal');
+  var modalBackdrop = document.getElementById('modalBackdrop');
+  var modalClose    = document.getElementById('modalClose');
+  var modalBody     = document.getElementById('modalBody');
 
   /** Build a YouTube embed URL from a video ID. */
   function ytEmbedUrl(videoId) {
     return 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&mute=1&playsinline=1';
   }
 
-  /**
-   * Convert a public reel/video URL to an embeddable iframe src.
-   *
-   * @param  {string} url  Full public URL of the Instagram Reel or YouTube video.
-   * @returns {string}     Ready-to-use iframe `src` value, or '' if not recognised.
-   *
-   * Supported formats:
-   *   Instagram – https://www.instagram.com/reel/CODE/
-   *               https://www.instagram.com/p/CODE/
-   *   YouTube   – https://www.youtube.com/shorts/ID
-   *               https://www.youtube.com/watch?v=ID
-   *               https://youtu.be/ID
-   */
+  /** Convert a public reel/video URL to an embeddable iframe src. */
   function buildEmbedUrl(url) {
     if (!url) return '';
 
-    // ── Instagram Reel or Post ──────────────────────────────────
-    // Matches: /reel/CODE/ or /p/CODE/
-    const igMatch = url.match(/instagram\.com\/(reel|p)\/([A-Za-z0-9_-]+)/);
+    var igMatch = url.match(/instagram\.com\/(reel|p)\/([A-Za-z0-9_-]+)/);
     if (igMatch) {
       return 'https://www.instagram.com/' + igMatch[1] + '/' + igMatch[2] + '/embed/captioned/';
     }
 
-    // ── YouTube Shorts ──────────────────────────────────────────
-    const ytShortsMatch = url.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]+)/);
+    var ytShortsMatch = url.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]+)/);
     if (ytShortsMatch) return ytEmbedUrl(ytShortsMatch[1]);
 
-    // ── YouTube standard watch URL ──────────────────────────────
-    const ytWatchMatch = url.match(/[?&]v=([A-Za-z0-9_-]+)/);
+    var ytWatchMatch = url.match(/[?&]v=([A-Za-z0-9_-]+)/);
     if (ytWatchMatch) return ytEmbedUrl(ytWatchMatch[1]);
 
-    // ── youtu.be short links ────────────────────────────────────
-    const ytShortMatch = url.match(/youtu\.be\/([A-Za-z0-9_-]+)/);
+    var ytShortMatch = url.match(/youtu\.be\/([A-Za-z0-9_-]+)/);
     if (ytShortMatch) return ytEmbedUrl(ytShortMatch[1]);
 
-    // URL not recognised
-    console.warn('[Mentyaa] Unrecognised reel URL — expected an Instagram Reel or YouTube link:', url);
+    console.warn('[Mentyaa] Unrecognised reel URL:', url);
     return '';
   }
 
-  /** Open the lightbox with the given video URL. */
-  function openModal(videoUrl) {
-    const embedUrl = buildEmbedUrl(videoUrl);
-    if (!embedUrl) return; // URL not recognised — do nothing
+  /** Open the lightbox with a local video file (<video> element). */
+  function openLocalVideoModal(src) {
+    var video = document.createElement('video');
+    video.className  = 'modal-video';
+    video.src        = src;
+    video.controls   = true;
+    video.autoplay   = true;
+    video.playsInline = true;
 
-    // Build a sandboxed iframe
-    const iframe = document.createElement('iframe');
+    modalBody.innerHTML = '';
+    modalBody.appendChild(video);
+
+    reelModal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    modalClose.focus();
+  }
+
+  /** Open the lightbox with an iframe embed (Instagram / YouTube). */
+  function openEmbedModal(url) {
+    var embedUrl = buildEmbedUrl(url);
+    if (!embedUrl) return;
+
+    var iframe = document.createElement('iframe');
     iframe.className = 'modal-iframe';
     iframe.src = embedUrl;
     iframe.setAttribute('frameborder', '0');
@@ -417,7 +382,7 @@
     iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
     iframe.setAttribute('title', 'Reel preview');
 
-    modalBody.innerHTML = ''; // clear any previous embed
+    modalBody.innerHTML = '';
     modalBody.appendChild(iframe);
 
     reelModal.hidden = false;
@@ -425,45 +390,45 @@
     modalClose.focus();
   }
 
-  /** Close the lightbox and stop the video. */
+  /** Close the lightbox and stop any playing video. */
   function closeModal() {
     reelModal.hidden = true;
     document.body.style.overflow = '';
-    modalBody.innerHTML = ''; // removing iframe stops the video
+    var vid = modalBody.querySelector('video');
+    if (vid) vid.pause();
+    modalBody.innerHTML = '';
   }
 
-  // Close on ✕ button
-  if (modalClose) {
-    modalClose.addEventListener('click', closeModal);
-  }
+  if (modalClose)    modalClose.addEventListener('click', closeModal);
+  if (modalBackdrop) modalBackdrop.addEventListener('click', closeModal);
 
-  // Close on backdrop click
-  if (modalBackdrop) {
-    modalBackdrop.addEventListener('click', closeModal);
-  }
-
-  // Close on ESC key
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && reelModal && !reelModal.hidden) {
-      closeModal();
-    }
+    if (e.key === 'Escape' && reelModal && !reelModal.hidden) closeModal();
   });
 
-  // Open modal when a reel card is clicked
-  document.querySelectorAll('.reel-card[data-reel-url]').forEach(function (card) {
-    card.addEventListener('click', function () {
-      const url = card.getAttribute('data-reel-url');
-      if (url) openModal(url);
-    });
+  // Attach click / keyboard handlers to every reel card
+  document.querySelectorAll('.reel-card').forEach(function (card) {
+    var videoSrc = card.getAttribute('data-video-src');
+    var reelUrl  = card.getAttribute('data-reel-url');
 
-    // Keyboard support — activate on Enter / Space
+    if (!videoSrc && !reelUrl) return; // no playable source — skip
+
     card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'button');
+
+    function handleActivate() {
+      if (videoSrc) {
+        openLocalVideoModal(videoSrc);
+      } else {
+        openEmbedModal(reelUrl);
+      }
+    }
+
+    card.addEventListener('click', handleActivate);
     card.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        const url = card.getAttribute('data-reel-url');
-        if (url) openModal(url);
+        handleActivate();
       }
     });
   });
