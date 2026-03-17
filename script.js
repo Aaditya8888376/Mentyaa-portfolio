@@ -7,6 +7,23 @@
   'use strict';
 
   /* ----------------------------------------------------------
+     0. DARK / LIGHT THEME TOGGLE
+  ---------------------------------------------------------- */
+  var themeToggle = document.getElementById('themeToggle');
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('mentya-theme', theme);
+  }
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'light' ? 'dark' : 'light');
+    });
+  }
+
+  /* ----------------------------------------------------------
      1. NAVBAR – scroll class + mobile toggle
   ---------------------------------------------------------- */
   const navbar   = document.getElementById('navbar');
@@ -26,37 +43,44 @@
   onScroll(); // run on load in case page starts mid-scroll
 
   /* Hamburger toggle */
-  navToggle.addEventListener('click', function () {
-    const isOpen = navMenu.classList.toggle('open');
-    navToggle.classList.toggle('open', isOpen);
-    navToggle.setAttribute('aria-expanded', String(isOpen));
-    // Prevent body scroll when menu open
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-  });
+  if (navToggle) {
+    navToggle.addEventListener('click', function () {
+      const isOpen = navMenu.classList.toggle('open');
+      navToggle.classList.toggle('open', isOpen);
+      navToggle.setAttribute('aria-expanded', String(isOpen));
+      // Prevent body scroll when menu open
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    });
+  }
 
   /* Close mobile menu when a nav link is clicked */
-  navMenu.querySelectorAll('.nav-link').forEach(function (link) {
-    link.addEventListener('click', function () {
-      navMenu.classList.remove('open');
-      navToggle.classList.remove('open');
-      navToggle.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
+  if (navMenu) {
+    navMenu.querySelectorAll('.nav-link').forEach(function (link) {
+      link.addEventListener('click', function () {
+        navMenu.classList.remove('open');
+        if (navToggle) {
+          navToggle.classList.remove('open');
+          navToggle.setAttribute('aria-expanded', 'false');
+        }
+        document.body.style.overflow = '';
+      });
     });
-  });
 
-  /* Close menu when clicking outside */
-  document.addEventListener('click', function (e) {
-    if (
-      navMenu.classList.contains('open') &&
-      !navMenu.contains(e.target) &&
-      !navToggle.contains(e.target)
-    ) {
-      navMenu.classList.remove('open');
-      navToggle.classList.remove('open');
-      navToggle.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
-    }
-  });
+    /* Close menu when clicking outside */
+    document.addEventListener('click', function (e) {
+      if (
+        navMenu.classList.contains('open') &&
+        !navMenu.contains(e.target) &&
+        navToggle && !navToggle.contains(e.target) &&
+        themeToggle && !themeToggle.contains(e.target)
+      ) {
+        navMenu.classList.remove('open');
+        navToggle.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+      }
+    });
+  }
 
   /* ----------------------------------------------------------
      2. SCROLL REVEAL – IntersectionObserver
@@ -207,7 +231,9 @@
   ---------------------------------------------------------- */
   document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
     anchor.addEventListener('click', function (e) {
-      const target = document.querySelector(anchor.getAttribute('href'));
+      var href = anchor.getAttribute('href');
+      if (!href || href === '#') return;
+      const target = document.querySelector(href);
       if (target) {
         e.preventDefault();
         const offset = 70; // account for fixed navbar height
@@ -282,10 +308,6 @@
       vid.preload       = 'metadata';
 
       vid.addEventListener('loadedmetadata', function () {
-        // Seek slightly in to skip potential black/blank opening frames.
-        // Uses 5% of duration or 0.5 s, whichever is smaller — best-effort.
-        // The CSS gradient already provides a visual fallback if the canvas
-        // draw produces a blank result (e.g. some codecs / DRM content).
         vid.currentTime = Math.min(0.5, (vid.duration * 0.05) || 0.1);
       });
 
@@ -297,7 +319,6 @@
           canvas.getContext('2d').drawImage(vid, 0, 0, canvas.width, canvas.height);
           applyThumb(placeholder, canvas.toDataURL('image/jpeg', 0.85));
         } catch (err) {
-          // CORS or decode error — gradient fallback is already showing
           console.warn('[Mentyaa] Could not auto-extract thumbnail for:', videoSrc, err);
         }
         vid.src = ''; // free memory
@@ -320,10 +341,12 @@
            YouTube watch  : https://www.youtube.com/watch?v=ID
            youtu.be short : https://youtu.be/ID
   ---------------------------------------------------------- */
-  var reelModal     = document.getElementById('reelModal');
-  var modalBackdrop = document.getElementById('modalBackdrop');
-  var modalClose    = document.getElementById('modalClose');
-  var modalBody     = document.getElementById('modalBody');
+  var reelModal       = document.getElementById('reelModal');
+  var modalBackdrop   = document.getElementById('modalBackdrop');
+  var modalClose      = document.getElementById('modalClose');
+  var modalBody       = document.getElementById('modalBody');
+  var modalFullscreen = document.getElementById('modalFullscreen');
+  var modalInner      = document.getElementById('modalInner');
 
   /** Build a YouTube embed URL from a video ID. */
   function ytEmbedUrl(videoId) {
@@ -336,7 +359,8 @@
 
     var igMatch = url.match(/instagram\.com\/(reel|p)\/([A-Za-z0-9_-]+)/);
     if (igMatch) {
-      return 'https://www.instagram.com/' + igMatch[1] + '/' + igMatch[2] + '/embed/captioned/';
+      // Use /embed/ (not /captioned/) to maximise fullscreen support
+      return 'https://www.instagram.com/' + igMatch[1] + '/' + igMatch[2] + '/embed/';
     }
 
     var ytShortsMatch = url.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]+)/);
@@ -366,7 +390,7 @@
 
     reelModal.hidden = false;
     document.body.style.overflow = 'hidden';
-    modalClose.focus();
+    if (modalClose) modalClose.focus();
   }
 
   /** Open the lightbox with an iframe embed (Instagram / YouTube). */
@@ -379,7 +403,9 @@
     iframe.src = embedUrl;
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', '');
-    iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+    // Include 'fullscreen' in the Permissions Policy allow attribute so
+    // the iframe is permitted to request fullscreen from within itself.
+    iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture; fullscreen');
     iframe.setAttribute('title', 'Reel preview');
 
     modalBody.innerHTML = '';
@@ -387,20 +413,62 @@
 
     reelModal.hidden = false;
     document.body.style.overflow = 'hidden';
-    modalClose.focus();
+    if (modalClose) modalClose.focus();
   }
 
   /** Close the lightbox and stop any playing video. */
   function closeModal() {
+    // Exit fullscreen if active
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(function () {});
+    } else if (document.webkitFullscreenElement) {
+      document.webkitExitFullscreen();
+    }
     reelModal.hidden = true;
     document.body.style.overflow = '';
-    var vid = modalBody.querySelector('video');
+    var vid = modalBody ? modalBody.querySelector('video') : null;
     if (vid) vid.pause();
-    modalBody.innerHTML = '';
+    if (modalBody) modalBody.innerHTML = '';
   }
 
   if (modalClose)    modalClose.addEventListener('click', closeModal);
   if (modalBackdrop) modalBackdrop.addEventListener('click', closeModal);
+
+  /* Fullscreen button: request fullscreen on the modal panel */
+  if (modalFullscreen && modalInner) {
+    modalFullscreen.addEventListener('click', function () {
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        // Already fullscreen — exit
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(function () {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      } else {
+        // Enter fullscreen on the modal panel
+        if (modalInner.requestFullscreen) {
+          modalInner.requestFullscreen().catch(function (err) {
+            console.warn('[Mentyaa] Fullscreen request failed:', err);
+          });
+        } else if (modalInner.webkitRequestFullscreen) {
+          modalInner.webkitRequestFullscreen();
+        }
+      }
+    });
+
+    /* Update fullscreen icon based on current fullscreen state */
+    document.addEventListener('fullscreenchange', updateFullscreenIcon);
+    document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
+
+    function updateFullscreenIcon() {
+      var isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (!modalFullscreen) return;
+      // Toggle between expand / compress icon
+      modalFullscreen.innerHTML = isFs
+        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>'
+        : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
+    }
+  }
 
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && reelModal && !reelModal.hidden) closeModal();
