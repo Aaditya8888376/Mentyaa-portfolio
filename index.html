@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Professional Instagram Reels editor and video shooter. Helping creators and brands grow with engaging short-form content." />
+  <meta name="keywords" content="Instagram Reels editor, video editing, short-form content, video shooting, social media" />
+  <meta name="author" content="Mentya" />
+  <meta property="og:title" content="Mentya – Professional Reels Editor" />
+  <meta property="og:description" content="Helping creators & brands grow with cinematic Instagram Reels." />
+  <meta property="og:type" content="website" />
+  <title>Mentya – Professional Reels Editor</title>
+  <!-- Inline theme init: apply saved theme before CSS loads to prevent flash -->
+  <script>
+    (function () {
+      var t = localStorage.getItem('mentya-theme');
+      if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    })();
+  </script>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav class="navbar" id="navbar" aria-label="Main navigation">
+    <!-- Background blur layer – kept as a sibling div so the <nav> itself
+         never has backdrop-filter, which would create a new containing block
+         for the position:fixed mobile menu and clip it to navbar height. -->
+    <div class="navbar-bg" aria-hidden="true"></div>
+    <div class="nav-container">
+      <a href="#hero" class="nav-logo" aria-label="Mentyaa home">
+        <span class="logo-text">MENTYA</span>
+      </a>
+      <ul class="nav-menu" id="navMenu" role="list">
+        <li><a href="portfolio.html" class="nav-link">Portfolio</a></li>
+        <li><a href="#services" class="nav-link">Services</a></li>
+        <li><a href="#results" class="nav-link">Results</a></li>
+        <li><a href="#about" class="nav-link">About</a></li>
+        <li><a href="#contact" class="nav-link nav-cta">Book Now</a></li>
+      </ul>
+      <!-- Right-side controls: theme toggle + hamburger -->
+      <div class="nav-controls">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark / light mode">
+          <!-- Moon icon (shown in dark mode) -->
+          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <!-- Sun icon (shown in light mode) -->
+          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               aria-hidden="true">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1"  x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22"  x2="5.64"  y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3"  y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64"  y2="18.36"/>
+            <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="navMenu">
+          <span class="burger-line"></span>
+          <span class="burger-line"></span>
+          <span class="burger-line"></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero" id="hero" aria-label="Hero">
+    <div class="hero-bg" aria-hidden="true">
+      <div class="hero-gradient"></div>
+      <div class="hero-particles" id="heroParticles"></div>
+    </div>
+    <div class="hero-content">
+      <span class="hero-badge reveal">✦ Available for projects</span>
+      <h1 class="hero-title reveal">
+        Professional<br />
+        <span class="gradient-text">Instagram Reels</span><br />
+        Editing
+      </h1>
+      <p class="hero-subtitle reveal">
+        I help creators &amp; brands grow with cinematic, scroll-stopping
+        short-form content that converts viewers into followers and clients.
+      </p>
+      <div class="hero-actions reveal">
+        <a href="portfolio.html" class="btn btn-primary">View Portfolio</a>
+        <a href="#contact" class="btn btn-secondary">Book Now</a>
+      </div>
+      <div class="hero-stats reveal">
+        <div class="stat">
+          <span class="stat-number">200+</span>
+          <span class="stat-label">Reels Edited</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat">
+          <span class="stat-number">10M+</span>
+          <span class="stat-label">Views Generated</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat">
+          <span class="stat-number">100+</span>
+          <span class="stat-label">Happy Clients</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-scroll" aria-hidden="true">
+      <span class="scroll-line"></span>
+      <span class="scroll-text">Scroll</span>
+    </div>
+  </section>
+
+  <!-- ===== PORTFOLIO CTA SECTION (links to portfolio.html) ===== -->
+  <section class="section portfolio-cta" id="portfolio" aria-labelledby="portfolio-heading">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">My Work</span>
+        <h2 class="section-title" id="portfolio-heading">Portfolio</h2>
+        <p class="section-desc">Cinematic, scroll-stopping reels crafted to grow brands and creators.</p>
+      </div>
+
+      <!-- 3-card preview strip (purely decorative — click takes you to the full page) -->
+      <div class="portfolio-preview-strip reveal">
+        <div class="preview-thumb">
+          <div class="preview-thumb-inner reel-gradient-1">
+            <div class="play-icon" style="display:flex;height:100%;align-items:center;justify-content:center;font-size:2rem;color:rgba(255,255,255,.6)">&#9654;</div>
+          </div>
+        </div>
+        <div class="preview-thumb">
+          <div class="preview-thumb-inner reel-gradient-5">
+            <div class="play-icon" style="display:flex;height:100%;align-items:center;justify-content:center;font-size:2rem;color:rgba(255,255,255,.6)">&#9654;</div>
+          </div>
+        </div>
+        <div class="preview-thumb">
+          <div class="preview-thumb-inner reel-gradient-2">
+            <div class="play-icon" style="display:flex;height:100%;align-items:center;justify-content:center;font-size:2rem;color:rgba(255,255,255,.6)">&#9654;</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="portfolio-cta-footer reveal">
+        <a href="portfolio.html" class="btn btn-primary btn-lg">View Full Portfolio ↗</a>
+        <span class="portfolio-count-hint">8+ cinematic reels · All categories</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SERVICES SECTION ===== -->
+  <section class="section services" id="services" aria-labelledby="services-heading">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">What I Do</span>
+        <h2 class="section-title" id="services-heading">Services</h2>
+        <p class="section-desc">End-to-end content creation from concept to final cut.</p>
+      </div>
+      <div class="services-grid">
+
+        <div class="service-card reveal">
+          <div class="service-icon" aria-hidden="true">🎬</div>
+          <h3 class="service-title">Instagram Reels Editing</h3>
+          <p class="service-desc">Viral-optimized cuts with trending music, transitions, and color grading tailored for the Reels algorithm.</p>
+          <ul class="service-features" role="list">
+            <li>Custom transitions &amp; effects</li>
+            <li>Color grading &amp; LUTs</li>
+            <li>Trending audio sync</li>
+          </ul>
+        </div>
+
+        <div class="service-card reveal">
+          <div class="service-icon" aria-hidden="true">✂️</div>
+          <h3 class="service-title">Short-Form Content Editing</h3>
+          <p class="service-desc">YouTube Shorts, and cross-platform content edited for maximum retention and shareability.</p>
+          <ul class="service-features" role="list">
+            <li>Hook optimization</li>
+            <li>Caption &amp; subtitle overlay</li>
+            <li>Platform-specific formatting</li>
+          </ul>
+        </div>
+
+        <div class="service-card reveal">
+          <div class="service-icon" aria-hidden="true">📸</div>
+          <h3 class="service-title">Video Shooting</h3>
+          <p class="service-desc">On-location or studio video shooting with professional equipment to give your brand a premium visual identity.</p>
+          <ul class="service-features" role="list">
+            <li>4K footage capture</li>
+            <li>Professional lighting setup</li>
+            <li>Direction &amp; storyboard planning</li>
+          </ul>
+        </div>
+
+        <div class="service-card reveal">
+          <div class="service-icon" aria-hidden="true">📱</div>
+          <h3 class="service-title">Social Media Content Creation</h3>
+          <p class="service-desc">Full content strategy and creation package — from scripting to publishing-ready deliverables.</p>
+          <ul class="service-features" role="list">
+            <li>Content calendar planning</li>
+            <li>Batch editing discounts</li>
+            <li>Thumbnail &amp; cover design</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== RESULTS / HIGHLIGHTS SECTION ===== -->
+  <section class="section results" id="results" aria-labelledby="results-heading">
+    <div class="results-bg" aria-hidden="true"></div>
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">Impact</span>
+        <h2 class="section-title" id="results-heading">Results &amp; Highlights</h2>
+        <p class="section-desc">Numbers that speak louder than words.</p>
+      </div>
+      <div class="stats-grid">
+        <div class="stats-card reveal" aria-label="200 plus reels edited">
+          <span class="counter" data-target="200">0</span><span class="stats-plus">+</span>
+          <p class="stats-label">Reels Edited</p>
+        </div>
+        <div class="stats-card reveal" aria-label="10 million plus views generated">
+          <span class="counter" data-target="50">0</span><span class="stats-plus">M+</span>
+          <p class="stats-label">Views Generated</p>
+        </div>
+        <div class="stats-card reveal" aria-label="100 plus happy clients">
+          <span class="counter" data-target="100">0</span><span class="stats-plus">+</span>
+          <p class="stats-label">Happy Clients</p>
+        </div>
+        <div class="stats-card reveal" aria-label="98 percent client satisfaction">
+          <span class="counter" data-target="98">0</span><span class="stats-plus">%</span>
+          <p class="stats-label">Satisfaction Rate</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ABOUT SECTION ===== -->
+  <section class="section about" id="about" aria-labelledby="about-heading">
+    <div class="container about-container">
+      <div class="about-visual reveal">
+        <div class="about-image-wrap">
+          <div class="about-avatar" aria-label="Editor portrait placeholder">
+            <div class="avatar-inner">
+              <span class="avatar-icon" aria-hidden="true">🎥</span>
+            </div>
+          </div>
+          <div class="about-badge-float about-badge-1">
+            <span>1+ Years</span><br /><small>Experience</small>
+          </div>
+          <div class="about-badge-float about-badge-2">
+            <span>Cap Cut</span><br /><small>After Effects</small>
+          </div>
+        </div>
+      </div>
+      <div class="about-content reveal">
+        <span class="section-tag">About Me</span>
+        <h2 class="section-title" id="about-heading">The Editor Behind the Frame</h2>
+        <p class="about-text">
+          Hey, I'm <strong>Mentya</strong> — a freelance video editor and content creator
+          passionate about transforming raw footage into cinematic, viral-worthy stories.
+        </p>
+        <p class="about-text">
+          With over 1 year of hands-on experience in short-form video, I've helped
+          80+ creators and brands stand out on Instagram Reels. From fashion labels to
+          fitness influencers, I understand what makes content stop the scroll.
+        </p>
+        <p class="about-text">
+          I combine the technical depth of professional editing tools — Premiere Pro,
+          After Effects, CapCut — with a storyteller's eye for pacing and emotion.
+          Every reel I deliver is crafted to grow your audience and strengthen your brand.
+        </p>
+        <div class="about-tools">
+          <span class="tool-badge">Premiere Pro</span>
+          <span class="tool-badge">After Effects</span>
+          <span class="tool-badge">CapCut</span>
+          <span class="tool-badge">DaVinci Resolve</span>
+          <span class="tool-badge">Lightroom</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TESTIMONIALS SECTION ===== -->
+  <section class="section testimonials" id="testimonials" aria-labelledby="testimonials-heading">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">Reviews</span>
+        <h2 class="section-title" id="testimonials-heading">What Clients Say</h2>
+        <p class="section-desc">Real results from real collaborations.</p>
+      </div>
+      <div class="testimonials-grid">
+
+        <blockquote class="testimonial-card reveal">
+          <div class="stars" aria-label="5 out of 5 stars" role="img">★★★★★</div>
+          <p class="testimonial-text">
+            "Mentya completely transformed our brand's Instagram. Our reach went from
+            10K to 200K in just 3 months. The editing quality is absolutely cinematic."
+          </p>
+          <footer class="testimonial-author">
+            <div class="author-avatar" aria-hidden="true">SR</div>
+            <div>
+              <cite class="author-name">Sneha R.</cite>
+              <span class="author-role">Fashion Brand Owner</span>
+            </div>
+          </footer>
+        </blockquote>
+
+        <blockquote class="testimonial-card reveal">
+          <div class="stars" aria-label="5 out of 5 stars" role="img">★★★★★</div>
+          <p class="testimonial-text">
+            "Fast delivery, incredible attention to detail, and always captures
+            the exact vibe I want. My Car Delievery reels went viral twice this month!"
+          </p>
+          <footer class="testimonial-author">
+            <div class="author-avatar" aria-hidden="true">AK</div>
+            <div>
+              <cite class="author-name">Arjun K.</cite>
+              <span class="author-role">Content Creator</span>
+            </div>
+          </footer>
+        </blockquote>
+
+        <blockquote class="testimonial-card reveal">
+          <div class="stars" aria-label="5 out of 5 stars" role="img">★★★★★</div>
+          <p class="testimonial-text">
+            "The Quality Mentya offer is 100% worth it. He shot AND edited everything
+            for our restaurant launch — the videos looked like a Netflix ad."
+          </p>
+          <footer class="testimonial-author">
+            <div class="author-avatar" aria-hidden="true">PM</div>
+            <div>
+              <cite class="author-name">Priya M.</cite>
+              <span class="author-role">Restaurant Owner</span>
+            </div>
+          </footer>
+        </blockquote>
+
+        <blockquote class="testimonial-card reveal">
+          <div class="stars" aria-label="5 out of 5 stars" role="img">★★★★★</div>
+          <p class="testimonial-text">
+            "I've worked with several editors before, but Mentya understands
+            short-form content at a completely different level. Highly recommend!"
+          </p>
+          <footer class="testimonial-author">
+            <div class="author-avatar" aria-hidden="true">RV</div>
+            <div>
+              <cite class="author-name">Rahul V.</cite>
+              <span class="author-role">Travel Creator</span>
+            </div>
+          </footer>
+        </blockquote>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CONTACT / BOOK SECTION ===== -->
+  <section class="section contact" id="contact" aria-labelledby="contact-heading">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">Let's Work Together</span>
+        <h2 class="section-title" id="contact-heading">Book Me</h2>
+        <p class="section-desc">Choose how you want to connect — I'm just one tap away.</p>
+      </div>
+
+      <div class="book-cards">
+
+        <!-- Instagram -->
+        <a href="https://www.instagram.com/mentya.gfx_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+           target="_blank" rel="noopener noreferrer"
+           class="book-card book-card--ig reveal"
+           aria-label="Open Instagram profile">
+          <div class="book-card__glow" aria-hidden="true"></div>
+          <div class="book-card__icon">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+          </div>
+          <div class="book-card__body">
+            <h3 class="book-card__title">Instagram</h3>
+            <p class="book-card__sub">@mentya.gfx_</p>
+            <span class="book-card__action">View Profile ↗</span>
+          </div>
+        </a>
+
+        <!-- Phone -->
+        <a href="tel:+9176203 92790"
+           class="book-card book-card--phone reveal"
+           aria-label="Call +91 76203 92790">
+          <div class="book-card__glow" aria-hidden="true"></div>
+          <div class="book-card__icon">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+            </svg>
+          </div>
+          <div class="book-card__body">
+            <h3 class="book-card__title">Phone</h3>
+            <p class="book-card__sub">+91 76203 92790</p>
+            <span class="book-card__action">Tap to Call ↗</span>
+          </div>
+        </a>
+
+        <!-- Email -->
+        <a href="mailto:your@email.com"
+           class="book-card book-card--email reveal"
+           aria-label="Send email to your@email.com">
+          <div class="book-card__glow" aria-hidden="true"></div>
+          <div class="book-card__icon">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <div class="book-card__body">
+            <h3 class="book-card__title">Email</h3>
+            <p class="book-card__sub">your@email.com</p>
+            <span class="book-card__action">Send Email ↗</span>
+          </div>
+        </a>
+
+      </div><!-- /.book-cards -->
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer" role="contentinfo">
+    <div class="container footer-container">
+      <div class="footer-brand">
+        <span class="logo-text">MENTYA</span>
+        <p class="footer-tagline">Crafting stories, one frame at a time.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <a href="portfolio.html">Portfolio</a>
+        <a href="#services">Services</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <p class="footer-copy">&copy; 2026 Mentya. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ===== REEL LIGHTBOX MODAL ===== -->
+  <div class="reel-modal" id="reelModal" role="dialog" aria-modal="true"
+       aria-label="Video preview" hidden>
+    <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true"></div>
+    <div class="modal-inner" id="modalInner">
+      <!-- Fullscreen toggle button -->
+      <button class="modal-fullscreen" id="modalFullscreen" aria-label="Toggle fullscreen">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+             aria-hidden="true">
+          <polyline points="15 3 21 3 21 9"/>
+          <polyline points="9 21 3 21 3 15"/>
+          <line x1="21" y1="3" x2="14" y2="10"/>
+          <line x1="3" y1="21" x2="10" y2="14"/>
+        </svg>
+      </button>
+      <button class="modal-close" id="modalClose" aria-label="Close video">
+        <!-- ✕ icon -->
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
+             stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+             aria-hidden="true">
+          <line x1="2" y1="2" x2="16" y2="16"/>
+          <line x1="16" y1="2" x2="2" y2="16"/>
+        </svg>
+      </button>
+      <!-- The iframe / embed is injected here by script.js -->
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
